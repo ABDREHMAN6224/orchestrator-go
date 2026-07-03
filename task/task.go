@@ -30,3 +30,10 @@ type Task struct {
 	StartTime     time.Time
 	EndTime       time.Time
 }
+
+type TaskEvent struct {
+	ID        uuid.UUID
+	TimeStamp time.Time
+	State     State
+	Task      Task
+}
