@@ -33,7 +33,7 @@ type Task struct {
 
 type TaskEvent struct {
 	ID        uuid.UUID
-	TimeStamp time.Time
+	Timestamp time.Time
 	State     State
 	Task      Task
 }
