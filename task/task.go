@@ -28,17 +28,20 @@ const (
 )
 
 type Task struct {
-	ID            uuid.UUID
-	Name          string
-	State         State
-	Image         string
-	Memory        int
-	Disk          int
+	ID          uuid.UUID
+	ContainerID string
+	Name        string
+	State       State
+	Image       string
+	Memory      int64
+	Cpu         float64
+
+	Disk          int64
 	ExposedPorts  nat.PortSet
 	PortBinidngs  map[string]string
 	RestartPolicy container.RestartPolicyMode
 	StartTime     time.Time
-	EndTime       time.Time
+	FinishTime    time.Time
 }
 
 type TaskEvent struct {
@@ -60,14 +63,31 @@ type Config struct {
 	Disk          int64
 	Env           []string
 	RestartPolicy container.RestartPolicyMode
-	Runtime       struct {
-		ContainerID string
+}
+
+func NewConfig(t *Task) *Config {
+	return &Config{
+		Name:          t.Name,
+		RestartPolicy: t.RestartPolicy,
+		Image:         t.Image,
+		Memory:        t.Memory,
+		Disk:          t.Disk,
+		ExposedPorts:  t.ExposedPorts,
+		Cpu:           t.Cpu,
 	}
 }
 
 type Docker struct {
 	Client *client.Client
 	Config Config
+}
+
+func NewDocker(c *Config) *Docker {
+	dc, _ := client.NewClientWithOpts(client.FromEnv)
+	return &Docker{
+		Client: dc,
+		Config: *c,
+	}
 }
 
 type DockerResult struct {
@@ -115,7 +135,6 @@ func (d *Docker) Run() DockerResult {
 		log.Printf("Error starting container %s: %v\n", resp.ID, err)
 		return DockerResult{Error: err}
 	}
-	d.Config.Runtime.ContainerID = resp.ID
 	out, err := d.Client.ContainerLogs(ctx, resp.ID, container.LogsOptions{
 		ShowStdout: true,
 		ShowStderr: true,
