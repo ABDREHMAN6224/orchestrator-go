@@ -9,6 +9,8 @@ require (
 	github.com/moby/moby/api v1.55.0
 )
 
+require github.com/go-chi/chi v1.5.5 // indirect
+
 require (
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
