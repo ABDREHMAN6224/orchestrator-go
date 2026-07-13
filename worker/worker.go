@@ -16,6 +16,7 @@ type Worker struct {
 	Queue     queue.Queue
 	Db        map[uuid.UUID]*task.Task
 	TaskCount int
+	Stats     *Stats
 }
 
 func NewWorker(name string) *Worker {
@@ -24,6 +25,15 @@ func NewWorker(name string) *Worker {
 		Queue:     *queue.New(),
 		Db:        make(map[uuid.UUID]*task.Task),
 		TaskCount: 0,
+	}
+}
+
+func (w *Worker) CollectStats() {
+	for {
+		log.Println("Collecting stats")
+		w.Stats = GetStats()
+		w.Stats.TaskCount = w.TaskCount
+		time.Sleep(15 * time.Second)
 	}
 }
 
@@ -36,9 +46,6 @@ func (w *Worker) GetTasks() []*task.Task {
 	return tasks
 }
 
-func (w *Worker) CollectStats() {
-	fmt.Println("I will collect stats")
-}
 func (w *Worker) AddTask(t task.Task) {
 	w.Queue.Enqueue(t)
 }
